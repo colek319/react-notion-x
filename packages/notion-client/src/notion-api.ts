@@ -1,6 +1,6 @@
 // import { promises as fs } from 'fs'
 import * as notion from 'notion-types'
-import got, { OptionsOfJSONResponseBody } from 'got'
+import ky, { Options } from 'ky'
 import {
   getBlockCollectionId,
   getPageContentBlockIds,
@@ -55,7 +55,7 @@ export class NotionAPI {
       signFileUrls?: boolean
       chunkLimit?: number
       chunkNumber?: number
-      gotOptions?: OptionsOfJSONResponseBody
+      gotOptions?: Options
     } = {}
   ): Promise<notion.ExtendedRecordMap> {
     const page = await this.getPageRaw(pageId, {
@@ -207,7 +207,7 @@ export class NotionAPI {
   }: {
     recordMap: notion.ExtendedRecordMap
     contentBlockIds?: string[]
-    gotOptions?: OptionsOfJSONResponseBody
+    gotOptions?: Options
   }) {
     recordMap.signed_urls = {}
 
@@ -281,7 +281,7 @@ export class NotionAPI {
     }: {
       chunkLimit?: number
       chunkNumber?: number
-      gotOptions?: OptionsOfJSONResponseBody
+      gotOptions?: Options
     } = {}
   ) {
     const parsedPageId = parsePageId(pageId)
@@ -322,7 +322,7 @@ export class NotionAPI {
       userTimeZone?: string
       userLocale?: string
       loadContentCover?: boolean
-      gotOptions?: OptionsOfJSONResponseBody
+      gotOptions?: Options
     } = {}
   ) {
     const type = collectionView?.type
@@ -497,10 +497,7 @@ export class NotionAPI {
     })
   }
 
-  public async getUsers(
-    userIds: string[],
-    gotOptions?: OptionsOfJSONResponseBody
-  ) {
+  public async getUsers(userIds: string[], gotOptions?: Options) {
     return this.fetch<notion.RecordValues<notion.User>>({
       endpoint: 'getRecordValues',
       body: {
@@ -510,10 +507,7 @@ export class NotionAPI {
     })
   }
 
-  public async getBlocks(
-    blockIds: string[],
-    gotOptions?: OptionsOfJSONResponseBody
-  ) {
+  public async getBlocks(blockIds: string[], gotOptions?: Options) {
     return this.fetch<notion.PageChunk>({
       endpoint: 'syncRecordValues',
       body: {
@@ -530,7 +524,7 @@ export class NotionAPI {
 
   public async getSignedFileUrls(
     urls: types.SignedUrlRequest[],
-    gotOptions?: OptionsOfJSONResponseBody
+    gotOptions?: Options
   ) {
     return this.fetch<types.SignedUrlResponse>({
       endpoint: 'getSignedFileUrls',
@@ -541,10 +535,7 @@ export class NotionAPI {
     })
   }
 
-  public async search(
-    params: notion.SearchParams,
-    gotOptions?: OptionsOfJSONResponseBody
-  ) {
+  public async search(params: notion.SearchParams, gotOptions?: Options) {
     const body = {
       type: 'BlocksInAncestor',
       source: 'quick_find_public',
@@ -581,7 +572,7 @@ export class NotionAPI {
   }: {
     endpoint: string
     body: object
-    gotOptions?: OptionsOfJSONResponseBody
+    gotOptions?: Options
     headers?: any
   }): Promise<T> {
     const headers: any = {
@@ -600,7 +591,7 @@ export class NotionAPI {
 
     const url = `${this._apiBaseUrl}/${endpoint}`
 
-    return got
+    return ky
       .post(url, {
         ...gotOptions,
         json: body,
